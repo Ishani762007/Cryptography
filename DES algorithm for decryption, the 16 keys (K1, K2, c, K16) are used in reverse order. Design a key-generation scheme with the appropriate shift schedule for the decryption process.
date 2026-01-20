@@ -1,0 +1,71 @@
+from Crypto.Cipher import DES
+from Crypto.Random import get_random_bytes
+
+def pad_message(message, block_size):
+    """Pads the message using '1' followed by '0's up to the next block size."""
+    padding_length = block_size - (len(message) % block_size)
+    if padding_length == 0:
+        padding_length = block_size  
+    padding = b'\x80' + b'\x00' * (padding_length - 1)
+    return message + padding
+
+def des_encrypt(plaintext, key):
+    """Encrypts using DES in ECB mode (for simplicity)."""
+    cipher = DES.new(key, DES.MODE_ECB)
+    padded_text = pad_message(plaintext, DES.block_size)
+    return cipher.encrypt(padded_text)
+
+def des_decrypt(ciphertext, key):
+    """Decrypts using DES with keys applied in reverse order."""
+    cipher = DES.new(key, DES.MODE_ECB)
+    decrypted_text = cipher.decrypt(ciphertext)
+    return decrypted_text.rstrip(b'\x80\x00')  
+
+
+key = get_random_bytes(8)
+
+plaintext = b"SecretMsg"  
+
+
+ciphertext = des_encrypt(plaintext, key)
+print("Encrypted:", ciphertext.hex())
+
+
+decrypted_text = des_decrypt(ciphertext, key)
+print("Decrypted:", decrypted_text.decode())
+
+OUTPUT:
+ 
+
+2. Write a program for encryption in the cipher block chaining (CBC) mode using an
+algorithm stronger than DES. 3DES is a good candidate. Both of which follow from the
+definition of CBC. Which of the two would you choose:
+a.	For security? b. For performance?
+CODE:
+from Crypto.Cipher import DES3
+from Crypto.Random import get_random_bytes
+
+def pad_message(message, block_size):
+    """Pads the message using '1' followed by '0's up to the next block size."""
+    padding_length = block_size - (len(message) % block_size)
+    if padding_length == 0:
+        padding_length = block_size  
+    padding = b'\x80' + b'\x00' * (padding_length - 1)
+    return message + padding
+
+def cbc_encrypt_3des(plaintext, key, iv):
+    cipher = DES3.new(key, DES3.MODE_CBC, iv)
+    padded_text = pad_message(plaintext, DES3.block_size)
+    return cipher.encrypt(padded_text)
+
+
+key = DES3.adjust_key_parity(get_random_bytes(24))  
+iv = get_random_bytes(8)  
+
+plaintext = b"SensitiveData1234"  
+
+
+ciphertext = cbc_encrypt_3des(plaintext, key, iv)
+
+
+print("3DES CBC Encrypted:", ciphertext.hex())
